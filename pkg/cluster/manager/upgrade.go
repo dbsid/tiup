@@ -104,7 +104,9 @@ func (m *Manager) Upgrade(name string, clusterVersion string, componentVersions 
 			comp.SetVersion(version)
 		}
 		calver := comp.CalculateVersion(clusterVersion)
-		if comp.Name() != spec.ComponentTiProxy || calver != oldver {
+		// TiProxy and the tidb-one routers (tidb-one) only restart when their
+		// own version changes: a restart drops their client connections.
+		if (comp.Name() != spec.ComponentTiProxy && comp.Name() != spec.ComponentTiDBOneRouter) || calver != oldver {
 			restartComponents = append(restartComponents, comp.Name(), comp.Role())
 			if len(comp.Instances()) > 0 {
 				compVersionMsg.WriteString(fmt.Sprintf("\nwill upgrade and restart component \"%19s\" to \"%s\",", comp.Name(), calver))

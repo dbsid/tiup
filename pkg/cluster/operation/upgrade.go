@@ -86,7 +86,7 @@ func Upgrade(
 		forcePDEndpoints := os.Getenv(EnvNamePDEndpointOverwrite) // custom set PD endpoint list
 
 		switch component.Name() {
-		case spec.ComponentTiKV:
+		case spec.ComponentTiKV, spec.ComponentTiDBOne:
 			if forcePDEndpoints != "" {
 				pdEndpoints = strings.Split(forcePDEndpoints, ",")
 				logger.Warnf("%s is set, using %s as PD endpoints", EnvNamePDEndpointOverwrite, pdEndpoints)

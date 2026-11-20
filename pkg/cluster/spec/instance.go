@@ -47,6 +47,8 @@ const (
 	ComponentResourceManager  = "resource-manager"
 	ComponentTiFlash          = "tiflash"
 	ComponentTiProxy          = "tiproxy"
+	ComponentTiDBOne          = "tidb-one"        // tidb-one: TiDB and TiKV in one process
+	ComponentTiDBOneRouter    = "tidb-one-router" // tidb-one: TiProxy locality router
 	ComponentGrafana          = "grafana"
 	ComponentDrainer          = "drainer"
 	ComponentDashboard        = "tidb-dashboard"

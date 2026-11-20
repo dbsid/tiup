@@ -412,7 +412,7 @@ func (m *Manager) DisplayTiKVLabels(dopt DisplayOption, opt operator.Options) er
 	masterActive := make([]string, 0)
 	tikvStoreIP := make(map[string]struct{})
 	for _, v := range clusterInstInfos {
-		if v.ComponentName == spec.ComponentTiKV {
+		if v.ComponentName == spec.ComponentTiKV || v.ComponentName == spec.ComponentTiDBOne {
 			tikvStoreIP[v.Host] = struct{}{}
 		}
 	}

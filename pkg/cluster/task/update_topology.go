@@ -71,6 +71,12 @@ func (u *UpdateTopology) Execute(ctx context.Context) error {
 			ops = append(ops, clientv3.OpDelete("/topology/tidb/"+utils.JoinHostPort(instance.GetHost(), instance.GetPort()), clientv3.WithPrefix()))
 		}
 	}
+	// tidb-one servers register in etcd as TiDB servers.
+	for _, instance := range (&spec.TiDBOneComponent{Topology: topo}).Instances() {
+		if deleted.Exist(instance.ID()) {
+			ops = append(ops, clientv3.OpDelete("/topology/tidb/"+utils.JoinHostPort(instance.GetHost(), instance.GetPort()), clientv3.WithPrefix()))
+		}
+	}
 
 	// the prometheus,grafana,alertmanager stored in etcd will be used by other components (tidb, pd, etc.)
 	// and they assume there is ONLY ONE prometheus.

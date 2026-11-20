@@ -835,16 +835,20 @@ func buildSessionCertTasks(m *Manager,
 	p *tui.SSHConnectionProps) ([]*task.StepDisplay, error) {
 	var certificateTasks []*task.StepDisplay // tasks which are used to copy certificate to remote host
 	hasOriginalTiProxy := false
+	// tidb-one: the tidb-one routers migrate sessions like TiProxy.
+	isProxy := func(inst spec.Instance) bool {
+		return inst.ComponentName() == spec.ComponentTiProxy || inst.ComponentName() == spec.ComponentTiDBOneRouter
+	}
 	if originalTopo != nil {
 		originalTopo.IterInstance(func(inst spec.Instance) {
-			if inst.ComponentName() == spec.ComponentTiProxy {
+			if isProxy(inst) {
 				hasOriginalTiProxy = true
 			}
 		})
 	}
 	hasNewTiProxy := false
 	newTopo.IterInstance(func(inst spec.Instance) {
-		if inst.ComponentName() == spec.ComponentTiProxy {
+		if isProxy(inst) {
 			hasNewTiProxy = true
 		}
 	})
@@ -856,7 +860,7 @@ func buildSessionCertTasks(m *Manager,
 	keyPath := filepath.Join(tempPath, "tiproxy-session.key")
 	certPath := filepath.Join(tempPath, "tiproxy-session.crt")
 	copySessionCerts := func(inst spec.Instance) {
-		if inst.ComponentName() != spec.ComponentTiDB {
+		if inst.ComponentName() != spec.ComponentTiDB && inst.ComponentName() != spec.ComponentTiDBOne {
 			return
 		}
 		deployDir := spec.Abs(base.User, inst.DeployDir())

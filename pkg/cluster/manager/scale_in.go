@@ -172,7 +172,7 @@ func (m *Manager) ScaleIn(
 
 // checkAsyncComps
 func checkAsyncComps(topo spec.Topology, nodes []string) error {
-	var asyncOfflineComps = set.NewStringSet(spec.ComponentPump, spec.ComponentTiKV, spec.ComponentTiFlash, spec.ComponentDrainer)
+	var asyncOfflineComps = set.NewStringSet(spec.ComponentPump, spec.ComponentTiKV, spec.ComponentTiFlash, spec.ComponentDrainer, spec.ComponentTiDBOne)
 	deletedNodes := set.NewStringSet(nodes...)
 	delAsyncOfflineComps := set.NewStringSet()
 	topo.IterInstance(func(instance spec.Instance) {

@@ -135,6 +135,15 @@ scrape_configs:
 {{- range .TiProxyStatusAddrs}}
       - '{{.}}'
 {{- end}}
+{{- if .TiDBOneRouterStatusAddrs}}
+  - job_name: "tidb-one-router"
+    honor_labels: true # don't overwrite job & instance labels
+    static_configs:
+    - targets:
+{{- range .TiDBOneRouterStatusAddrs}}
+      - '{{.}}'
+{{- end}}
+{{- end}}
   - job_name: "tikv"
     honor_labels: true # don't overwrite job & instance labels
 {{- if .TLSEnabled}}

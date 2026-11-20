@@ -396,6 +396,23 @@ func (i *MonitorInstance) InitConfig(
 			cfig.AddTiDB(db.Host, uint64(db.StatusPort))
 		}
 	}
+	// tidb-one: a server is scraped as a TiDB and as a TiKV, so the TiDB
+	// and TiKV dashboards cover it; the routers get their own job.
+	if servers, found := topoHasField("TiDBOneServers"); found {
+		for i := 0; i < servers.Len(); i++ {
+			one := servers.Index(i).Interface().(*TiDBOneSpec)
+			uniqueHosts.Insert(one.Host)
+			cfig.AddTiDB(one.Host, uint64(one.StatusPort))
+			cfig.AddTiKV(one.Host, uint64(one.TiKVStatusPort))
+		}
+	}
+	if servers, found := topoHasField("TiDBOneRouters"); found {
+		for i := 0; i < servers.Len(); i++ {
+			r := servers.Index(i).Interface().(*TiDBOneRouterSpec)
+			uniqueHosts.Insert(r.Host)
+			cfig.AddTiDBOneRouter(r.Host, uint64(r.StatusPort))
+		}
+	}
 	if servers, found := topoHasField("TiProxyServers"); found {
 		for i := 0; i < servers.Len(); i++ {
 			db := servers.Index(i).Interface().(*TiProxySpec)

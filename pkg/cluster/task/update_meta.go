@@ -65,6 +65,24 @@ func (u *UpdateMeta) Execute(ctx context.Context) error {
 	}
 	newMeta.Topology.TiKVServers = tikvServers
 
+	// tidb-one
+	oneServers := make([]*spec.TiDBOneSpec, 0)
+	for i, instance := range (&spec.TiDBOneComponent{Topology: topo}).Instances() {
+		if deleted.Exist(instance.ID()) {
+			continue
+		}
+		oneServers = append(oneServers, topo.TiDBOneServers[i])
+	}
+	newMeta.Topology.TiDBOneServers = oneServers
+	oneRouters := make([]*spec.TiDBOneRouterSpec, 0)
+	for i, instance := range (&spec.TiDBOneRouterComponent{Topology: topo}).Instances() {
+		if deleted.Exist(instance.ID()) {
+			continue
+		}
+		oneRouters = append(oneRouters, topo.TiDBOneRouters[i])
+	}
+	newMeta.Topology.TiDBOneRouters = oneRouters
+
 	tikvWorkerServers := make([]*spec.TiKVWorkerSpec, 0)
 	for i, instance := range (&spec.TiKVWorkerComponent{Topology: topo}).Instances() {
 		if deleted.Exist(instance.ID()) {

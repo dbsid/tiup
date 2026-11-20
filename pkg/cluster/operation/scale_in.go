@@ -36,7 +36,7 @@ import (
 )
 
 // TODO: We can make drainer not async.
-var asyncOfflineComps = set.NewStringSet(spec.ComponentPump, spec.ComponentTiKV, spec.ComponentTiFlash, spec.ComponentDrainer)
+var asyncOfflineComps = set.NewStringSet(spec.ComponentPump, spec.ComponentTiKV, spec.ComponentTiFlash, spec.ComponentDrainer, spec.ComponentTiDBOne)
 
 // AsyncNodes return all nodes async destroy or not.
 func AsyncNodes(spec *spec.Specification, nodes []string, async bool) []string {
@@ -127,8 +127,9 @@ func ScaleInCluster(
 			return errors.New("cannot delete all PD servers")
 		}
 
-		// Cannot delete all TiKV servers
-		if len(deletedDiff[spec.ComponentTiKV]) == len(cluster.TiKVServers) {
+		// Cannot delete all TiKV servers (tidb-one servers are TiKV stores too)
+		if len(deletedDiff[spec.ComponentTiKV]) == len(cluster.TiKVServers) &&
+			len(deletedDiff[spec.ComponentTiDBOne]) == len(cluster.TiDBOneServers) {
 			return errors.New("cannot delete all TiKV servers")
 		}
 
@@ -347,6 +348,12 @@ func ScaleInCluster(
 		cluster.TiKVServers[i] = s
 	}
 
+	for _, s := range cluster.TiDBOneServers { // tidb-one
+		if deletedNodes.Exist(utils.JoinHostPort(s.Host, s.Port)) {
+			s.Offline = true
+		}
+	}
+
 	for i := 0; i < len(cluster.TiFlashServers); i++ {
 		s := cluster.TiFlashServers[i]
 		id := utils.JoinHostPort(s.Host, s.TCPPort)
@@ -396,6 +403,11 @@ func deleteMember(
 	switch component.Name() {
 	case spec.ComponentTiKV:
 		if err := pdClient.DelStore(instance.ID(), timeoutOpt); err != nil {
+			return err
+		}
+	case spec.ComponentTiDBOne:
+		// tidb-one: move the sessions away, then take the store offline.
+		if err := instance.(*spec.TiDBOneInstance).ScaleIn(ctx, pdClient, timeoutOpt); err != nil {
 			return err
 		}
 	case spec.ComponentTiFlash:

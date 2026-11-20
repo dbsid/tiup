@@ -36,6 +36,13 @@ func newUpgradeCmd() *cobra.Command {
 				return cmd.Help()
 			}
 
+			// tidb-one: upgrade one task at a time unless -c is given. Parallel
+			// backup and copy of the tidb-one-server binaries (600 MB each) on
+			// a host also running PD stalled PD's disk and lost the PD leader.
+			if f := cmd.Flag("concurrency"); f != nil && !f.Changed {
+				gOpt.Concurrency = 1
+			}
+
 			clusterName := args[0]
 			version, err := utils.FmtVer(args[1])
 			if err != nil {

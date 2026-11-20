@@ -8,7 +8,6 @@ DEPLOY_DIR={{.DeployDir}}
 cd "${DEPLOY_DIR}" || exit 1
 
 # tidb-one-server: TiDB and TiKV in one process.
-export MALLOC_CONF="prof:true,prof_active:false"
 
 {{- if and .NumaNode .NumaCores}}
 exec numactl --cpunodebind={{.NumaNode}} --membind={{.NumaNode}} -C {{.NumaCores}} env GODEBUG=madvdontneed=1 bin/tidb-one-server \

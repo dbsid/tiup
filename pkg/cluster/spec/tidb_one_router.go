@@ -26,9 +26,11 @@ import (
 
 	perrs "github.com/pingcap/errors"
 	"github.com/pingcap/tiup/pkg/cluster/ctxt"
+	"github.com/pingcap/tiup/pkg/cluster/template/config"
 	"github.com/pingcap/tiup/pkg/cluster/template/scripts"
 	logprinter "github.com/pingcap/tiup/pkg/logger/printer"
 	"github.com/pingcap/tiup/pkg/meta"
+	"github.com/pingcap/tiup/pkg/set"
 	"github.com/pingcap/tiup/pkg/utils"
 )
 
@@ -306,5 +308,24 @@ func DrainTiDBOneOnRouters(ctx context.Context, topo *Specification, sqlAddr str
 			return ctx.Err()
 		case <-time.After(500 * time.Millisecond):
 		}
+	}
+}
+
+// addTiDBOneTargets adds the Prometheus targets of the tidb-one components.
+// A server is scraped as a TiDB and as a TiKV, so the stock TiDB and TiKV
+// dashboards cover it; the routers get their own job.
+func addTiDBOneTargets(cfig *config.PrometheusConfig, topo Topology, hosts set.StringSet) {
+	cluster, ok := topo.(*Specification)
+	if !ok {
+		return
+	}
+	for _, one := range cluster.TiDBOneServers {
+		hosts.Insert(one.Host)
+		cfig.AddTiDB(one.Host, uint64(one.StatusPort))
+		cfig.AddTiKV(one.Host, uint64(one.TiKVStatusPort))
+	}
+	for _, r := range cluster.TiDBOneRouters {
+		hosts.Insert(r.Host)
+		cfig.AddTiDBOneRouter(r.Host, uint64(r.StatusPort))
 	}
 }

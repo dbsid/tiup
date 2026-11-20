@@ -36,6 +36,7 @@ type PrometheusConfig struct {
 	NodeExporterAddrs         []string
 	TiDBStatusAddrs           []string
 	TiProxyStatusAddrs        []string
+	TiDBOneRouterStatusAddrs  []string // tidb-one
 	TiKVStatusAddrs           []string
 	TiKVWorkerAddrs           []string
 	PDAddrs                   []string
@@ -92,6 +93,12 @@ func (c *PrometheusConfig) AddTiDB(ip string, port uint64) *PrometheusConfig {
 // AddTiProxy add a TiProxy address
 func (c *PrometheusConfig) AddTiProxy(ip string, port uint64) *PrometheusConfig {
 	c.TiProxyStatusAddrs = append(c.TiProxyStatusAddrs, utils.JoinHostPort(ip, int(port)))
+	return c
+}
+
+// AddTiDBOneRouter adds a tidb-one router status address.
+func (c *PrometheusConfig) AddTiDBOneRouter(ip string, port uint64) *PrometheusConfig {
+	c.TiDBOneRouterStatusAddrs = append(c.TiDBOneRouterStatusAddrs, utils.JoinHostPort(ip, int(port)))
 	return c
 }
 

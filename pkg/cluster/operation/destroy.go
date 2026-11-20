@@ -559,6 +559,31 @@ func DestroyClusterTombstone(
 		}
 	}
 
+	// tidb-one: a server goes away with its store.
+	var oneServers []*spec.TiDBOneSpec
+	for _, s := range cluster.TiDBOneServers {
+		if !s.Offline {
+			oneServers = append(oneServers, s)
+			continue
+		}
+		tombstone, err := pdClient.IsTombStone(s.StoreAddr())
+		if err != nil {
+			return nil, err
+		}
+		if !tombstone {
+			oneServers = append(oneServers, s)
+			continue
+		}
+		id := utils.JoinHostPort(s.Host, s.Port)
+		nodes = append(nodes, id)
+		if returNodesOnly {
+			continue
+		}
+		if err := maybeDestroyMonitor((&spec.TiDBOneComponent{Topology: cluster}).Instances(), id); err != nil {
+			return nil, err
+		}
+	}
+
 	var flashServers []*spec.TiFlashSpec
 	for _, s := range cluster.TiFlashServers {
 		if !s.Offline {
@@ -655,6 +680,7 @@ func DestroyClusterTombstone(
 	}
 
 	cluster.TiKVServers = kvServers
+	cluster.TiDBOneServers = oneServers
 	cluster.TiFlashServers = flashServers
 	cluster.PumpServers = pumpServers
 	cluster.Drainers = drainerServers

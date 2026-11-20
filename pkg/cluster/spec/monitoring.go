@@ -396,6 +396,7 @@ func (i *MonitorInstance) InitConfig(
 			cfig.AddTiDB(db.Host, uint64(db.StatusPort))
 		}
 	}
+	addTiDBOneTargets(cfig, i.topo, uniqueHosts) // tidb-one
 	if servers, found := topoHasField("TiProxyServers"); found {
 		for i := 0; i < servers.Len(); i++ {
 			db := servers.Index(i).Interface().(*TiProxySpec)

@@ -605,6 +605,8 @@ func (s *Specification) portConflictsDetect() error {
 	portTypes := []string{
 		"Port",
 		"StatusPort",
+		"TiKVPort",       // tidb-one
+		"TiKVStatusPort", // tidb-one
 		"PeerPort",
 		"ClientPort",
 		"WebPort",

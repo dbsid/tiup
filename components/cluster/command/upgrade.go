@@ -25,6 +25,7 @@ func newUpgradeCmd() *cobra.Command {
 	offlineMode := false
 	ignoreVersionCheck := false
 	var tidbVer, tikvVer, pdVer, tsoVer, schedulingVer, resourceManagerVer, routerVer, tiflashVer, kvcdcVer, dashboardVer, cdcVer, alertmanagerVer, nodeExporterVer, blackboxExporterVer, tiproxyVer string
+	var tidbOneVer, tidbOneRouterVer string // tidb-one
 	var restartTimeout time.Duration
 
 	cmd := &cobra.Command{
@@ -55,6 +56,8 @@ func newUpgradeCmd() *cobra.Command {
 				spec.ComponentTiKVCDC:          kvcdcVer,
 				spec.ComponentCDC:              cdcVer,
 				spec.ComponentTiProxy:          tiproxyVer,
+				spec.ComponentTiDBOne:          tidbOneVer,       // tidb-one
+				spec.ComponentTiDBOneRouter:    tidbOneRouterVer, // tidb-one
 				spec.ComponentBlackboxExporter: blackboxExporterVer,
 				spec.ComponentNodeExporter:     nodeExporterVer,
 			}
@@ -92,6 +95,8 @@ func newUpgradeCmd() *cobra.Command {
 	cmd.Flags().StringVar(&nodeExporterVer, "node-exporter-version", "", "Fix the version of node-exporter and no longer follows the cluster version.")
 	cmd.Flags().StringVar(&blackboxExporterVer, "blackbox-exporter-version", "", "Fix the version of blackbox-exporter and no longer follows the cluster version.")
 	cmd.Flags().StringVar(&tiproxyVer, "tiproxy-version", "", "Fix the version of tiproxy and no longer follows the cluster version.")
+	cmd.Flags().StringVar(&tidbOneVer, "tidb-one-version", "", "Fix the version of tidb-one and no longer follows the cluster version.")
+	cmd.Flags().StringVar(&tidbOneRouterVer, "tidb-one-router-version", "", "Fix the version of tidb-one-router and no longer follows the cluster version.")
 	cmd.Flags().DurationVar(&restartTimeout, "restart-timeout", time.Second*0, "Timeout for after upgrade prompt")
 	return cmd
 }

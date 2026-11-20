@@ -233,6 +233,11 @@ func Stop(
 
 // NeedCheckTombstone return true if we need to check and destroy some node.
 func NeedCheckTombstone(topo *spec.Specification) bool {
+	for _, s := range topo.TiDBOneServers { // tidb-one
+		if s.Offline {
+			return true
+		}
+	}
 	for _, s := range topo.TiKVServers {
 		if s.Offline {
 			return true

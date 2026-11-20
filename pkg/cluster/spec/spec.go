@@ -152,6 +152,8 @@ type (
 		CDC             string `yaml:"cdc,omitempty"`
 		TiKVCDC         string `yaml:"kvcdc,omitempty"`
 		TiProxy         string `yaml:"tiproxy,omitempty"`
+		TiDBOne         string `yaml:"tidb_one,omitempty"`        // tidb-one
+		TiDBOneRouter   string `yaml:"tidb_one_router,omitempty"` // tidb-one
 		Prometheus      string `yaml:"prometheus,omitempty"`
 		Grafana         string `yaml:"grafana,omitempty"`
 		AlertManager    string `yaml:"alertmanager,omitempty"`
@@ -186,6 +188,8 @@ type (
 		TiKVWorkerServers      []*TiKVWorkerSpec      `yaml:"tikv_worker_servers,omitempty"`
 		TiFlashServers         []*TiFlashSpec         `yaml:"tiflash_servers"`
 		TiProxyServers         []*TiProxySpec         `yaml:"tiproxy_servers"`
+		TiDBOneServers         []*TiDBOneSpec         `yaml:"tidb_one_servers,omitempty"` // tidb-one
+		TiDBOneRouters         []*TiDBOneRouterSpec   `yaml:"tidb_one_routers,omitempty"` // tidb-one
 		PDServers              []*PDSpec              `yaml:"pd_servers"`
 		TSOServers             []*TSOSpec             `yaml:"tso_servers,omitempty"`
 		SchedulingServers      []*SchedulingSpec      `yaml:"scheduling_servers,omitempty"`
@@ -577,6 +581,8 @@ func (s *Specification) Merge(that Topology) Topology {
 		DashboardServers:       append(s.DashboardServers, spec.DashboardServers...),
 		TiFlashServers:         append(s.TiFlashServers, spec.TiFlashServers...),
 		TiProxyServers:         append(s.TiProxyServers, spec.TiProxyServers...),
+		TiDBOneServers:         append(s.TiDBOneServers, spec.TiDBOneServers...),
+		TiDBOneRouters:         append(s.TiDBOneRouters, spec.TiDBOneRouters...),
 		TSOServers:             append(s.TSOServers, spec.TSOServers...),
 		SchedulingServers:      append(s.SchedulingServers, spec.SchedulingServers...),
 		ResourceManagerServers: append(s.ResourceManagerServers, spec.ResourceManagerServers...),
@@ -607,6 +613,8 @@ func (v *ComponentVersions) Merge(that ComponentVersions) ComponentVersions {
 		Dashboard:       utils.Ternary(that.Dashboard != "", that.Dashboard, v.Dashboard).(string),
 		TiFlash:         utils.Ternary(that.TiFlash != "", that.TiFlash, v.TiFlash).(string),
 		TiProxy:         utils.Ternary(that.TiProxy != "", that.TiProxy, v.TiProxy).(string),
+		TiDBOne:         utils.Ternary(that.TiDBOne != "", that.TiDBOne, v.TiDBOne).(string),
+		TiDBOneRouter:   utils.Ternary(that.TiDBOneRouter != "", that.TiDBOneRouter, v.TiDBOneRouter).(string),
 		Pump:            utils.Ternary(that.Pump != "", that.Pump, v.Pump).(string),
 		Drainer:         utils.Ternary(that.Drainer != "", that.Drainer, v.Drainer).(string),
 		CDC:             utils.Ternary(that.CDC != "", that.CDC, v.CDC).(string),
@@ -825,9 +833,11 @@ func (s *Specification) ComponentsByStartOrder() (comps []Component) {
 	comps = append(comps, &DashboardComponent{s})
 	comps = append(comps, &TiProxyComponent{s})
 	comps = append(comps, &TiKVComponent{s})
+	comps = append(comps, &TiDBOneComponent{s}) // tidb-one
 	comps = append(comps, &TiKVWorkerComponent{s})
 	comps = append(comps, &PumpComponent{s})
 	comps = append(comps, &TiDBComponent{s})
+	comps = append(comps, &TiDBOneRouterComponent{s}) // tidb-one
 	comps = append(comps, &TiFlashComponent{s})
 	comps = append(comps, &DrainerComponent{s})
 	comps = append(comps, &CDCComponent{s})
@@ -859,8 +869,10 @@ func (s *Specification) ComponentsByUpdateOrder(curVer string) (comps []Componen
 	comps = append(comps, &TiProxyComponent{s})
 	comps = append(comps, &TiKVWorkerComponent{s})
 	comps = append(comps, &TiKVComponent{s})
+	comps = append(comps, &TiDBOneComponent{s}) // tidb-one
 	comps = append(comps, &PumpComponent{s})
 	comps = append(comps, &TiDBComponent{s})
+	comps = append(comps, &TiDBOneRouterComponent{s}) // tidb-one
 	comps = append(comps, &DrainerComponent{s})
 	if !cdcUpgradeBeforePDTiKVTiDB {
 		comps = append(comps, &CDCComponent{s})
